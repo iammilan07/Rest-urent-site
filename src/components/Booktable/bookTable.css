@@ -117,7 +117,12 @@
   margin-bottom: 1rem;
   display: inline-block;
   font-weight: bold;
-  color: #fff;
+}
+
+.table-card.globally-booked {
+  background: #555; /* gray for other users */
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 .toast-message {

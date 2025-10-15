@@ -11,42 +11,48 @@ const tablesData = [
 ];
 
 const BookTable = () => {
-  const [bookedTable, setBookedTable] = useState(null);
+  const [bookedTable, setBookedTable] = useState(null); // user's booked table
+  const [globalBooked, setGlobalBooked] = useState([]); // all booked tables
   const [selectedTable, setSelectedTable] = useState(null);
   const [showConfirm, setShowConfirm] = useState(false);
-  const [permanentMessage, setPermanentMessage] = useState(''); // Permanent booking message
-  const [toastMessage, setToastMessage] = useState(''); // Temporary toast messages
+  const [permanentMessage, setPermanentMessage] = useState('');
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
-    const fetchBooking = async () => {
+    const fetchBookings = async () => {
       try {
         const token = localStorage.getItem('token');
-        const res = await axios.get('/api/bookings', {
+
+        // Fetch user's booked table
+        const userRes = await axios.get('/api/bookings', {
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (res.data.length > 0) {
-  const tableId = res.data[0].tableNumber;
-  setBookedTable(tableId);
+        if (userRes.data.length > 0) {
+          const tableId = userRes.data[0].tableNumber;
+          setBookedTable(tableId);
+          const table = tablesData.find(t => t.id === tableId);
+          if (table) setPermanentMessage(`You have booked ${table.name}`);
+        }
 
-  const table = tablesData.find(t => t.id === tableId);
-  if (table) {
-    setPermanentMessage(`You have booked ${table.name}`);
-  }
-}
+        // Fetch all booked tables
+        const allRes = await axios.get('/api/bookings/all');
+        setGlobalBooked(allRes.data.map(b => b.tableNumber));
 
       } catch (err) {
         console.error(err);
       }
     };
-    fetchBooking();
+    fetchBookings();
   }, []);
 
   const handleBookClick = (table) => {
-    if (bookedTable && bookedTable !== table.id) {
-      setToastMessage('You can only book one table at a time!');
+    if (globalBooked.includes(table.id) && bookedTable !== table.id) {
+      // Already booked by someone else
+      setToastMessage('Table is already booked! Please choose another table.');
       setTimeout(() => setToastMessage(''), 3000);
       return;
     }
+
     setSelectedTable(table);
     setShowConfirm(true);
   };
@@ -54,27 +60,33 @@ const BookTable = () => {
   const confirmBooking = async () => {
     try {
       const token = localStorage.getItem('token');
+
       if (bookedTable === selectedTable.id) {
         // Cancel booking
         await axios.delete(`/api/bookings/${selectedTable.id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setBookedTable(null);
-        setPermanentMessage(''); // clear permanent booking message
+        setPermanentMessage('');
         setToastMessage(`You have removed ${selectedTable.name}`);
-        setTimeout(() => setToastMessage(''), 3000);
+
       } else {
         // Book table
         await axios.post('/api/bookings', { tableNumber: selectedTable.id }, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setBookedTable(selectedTable.id);
-        setPermanentMessage(`You have booked ${selectedTable.name}`); // permanent
+        setPermanentMessage(`You have booked ${selectedTable.name}`);
       }
+
       setShowConfirm(false);
+      // refresh global bookings
+      const allRes = await axios.get('/api/bookings/all');
+      setGlobalBooked(allRes.data.map(b => b.tableNumber));
+
     } catch (err) {
       console.error(err);
-      setToastMessage('Error booking table!');
+      setToastMessage('Error booking table');
       setTimeout(() => setToastMessage(''), 3000);
     }
   };
@@ -83,34 +95,34 @@ const BookTable = () => {
     <div className="booktable-container">
       <h2 className="greeting">Book your desired table {localStorage.getItem('username')}</h2>
 
-      {permanentMessage && (
-        <div className="permanent-message">{permanentMessage}</div>
-      )}
-
-      {toastMessage && (
-        <div className="toast-message">{toastMessage}</div>
-      )}
+      {permanentMessage && <div className="permanent-message">{permanentMessage}</div>}
+      {toastMessage && <div className="toast-message">{toastMessage}</div>}
 
       <div className="tables-grid">
-        {tablesData.map((table) => (
-          <div
-            key={table.id}
-            className={`table-card ${bookedTable === table.id ? 'booked' : ''}`}
-            onClick={() => handleBookClick(table)}
-          >
-            {table.name}
-            <button className="book-btn">
-              {bookedTable === table.id ? 'Cancel' : 'Book Now'}
-            </button>
-          </div>
-        ))}
+        {tablesData.map((table) => {
+          const isGloballyBooked = globalBooked.includes(table.id);
+          const isUserBooked = bookedTable === table.id;
+
+          return (
+            <div
+              key={table.id}
+              className={`table-card ${isUserBooked ? 'booked' : ''} ${isGloballyBooked && !isUserBooked ? 'globally-booked' : ''}`}
+              onClick={() => handleBookClick(table)}
+            >
+              {table.name}
+              <button className="book-btn">
+                {isUserBooked ? 'Cancel' : isGloballyBooked ? 'Booked' : 'Book Now'}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {showConfirm && (
         <div className="confirm-modal">
           <div className="confirm-card">
             <h3>
-              {bookedTable === selectedTable.id
+              {bookedTable === selectedTable?.id
                 ? `Are you sure you want to cancel ${selectedTable.name}?`
                 : `Are you sure you want to book ${selectedTable.name}?`}
             </h3>

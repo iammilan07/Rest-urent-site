@@ -43,3 +43,12 @@ exports.deleteBooking = async (req, res) => {
     }
 };
 
+// Fetch all booked tables
+exports.getAllBookings = async (req, res) => {
+  try {
+    const bookings = await TableBooking.find({}, 'tableNumber'); // only need tableNumber
+    res.json(bookings);
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
