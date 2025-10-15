@@ -7,6 +7,8 @@ import Register from './components/Auth/Register';
 import Welcome from './components/Welcome/welcome';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
+import BookTable from './components/Booktable/bookTable';
+
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,11 +39,13 @@ const App = () => {
         } />
         <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/booktable" element={<BookTable />} />
+
       </Routes>
 
       <ToastContainer 
   position="top-right" 
-  autoClose={2000} 
+  autoClose={100} 
   hideProgressBar={true} 
   newestOnTop={true} 
   closeOnClick 

@@ -2,6 +2,9 @@ const express = require('express');
 const connectDB = require('./config/db');
 const dotenv = require('dotenv');
 const authRoutes = require('./routes/auth');
+const bookingRoutes = require('./routes/table'); // your table route
+
+
 
 dotenv.config();
 const app = express();
@@ -32,6 +35,9 @@ app.get('/api/count', (req, res) => {
 });
 // Routes 
 app.use('/api/auth', authRoutes);
+
+// After authRoutes
+app.use('/api/bookings', bookingRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
