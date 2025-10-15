@@ -176,3 +176,28 @@
     line-height: 70px;
   }
 }
+
+
+/* Transparent, minimal toast */
+.Toastify__toast--success {
+  background: rgba(0,0,0,0.7) !important;
+  color: #fff !important;
+  font-weight: 500;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  padding: 12px 20px;
+}
+
+.Toastify__toast--error {
+  background: rgba(255,0,0,0.8) !important;
+  color: #fff !important;
+  font-weight: 500;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  padding: 12px 20px;
+}
+
+/* Remove progress bar */
+.Toastify__progress-bar {
+  display: none !important;
+}

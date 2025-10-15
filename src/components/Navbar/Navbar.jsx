@@ -1,43 +1,103 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { GiHamburgerMenu } from 'react-icons/gi';
 import { MdOutlineRestaurantMenu } from 'react-icons/md';
+import { FiLogOut } from 'react-icons/fi';
 import images from '../../constants/images';
 import './Navbar.css';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
-  const [toggleMenu, setToggleMenu] = React.useState(false);
+  const [toggleMenu, setToggleMenu] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setShowLogoutModal(false);
+    navigate('/login'); // redirect
+  };
+
   return (
     <nav className="app__navbar">
       <div className="app__navbar-logo">
         <img src={images.paradise} alt="app__logo" />
       </div>
+
       <ul className="app__navbar-links">
-        <li className="p__opensans"><a href="#home">Home</a></li>
+        <li className="p__opensans"><Link to="/">Home</Link></li>
         <li className="p__opensans"><a href="#about">About</a></li>
         <li className="p__opensans"><a href="#menu">Menu</a></li>
         <li className="p__opensans"><a href="#awards">Awards</a></li>
         <li className="p__opensans"><a href="#contact">Contact</a></li>
       </ul>
+
       <div className="app__navbar-login">
-        <a href="#login" className="p__opensans">Log In / Registration</a>
+        {isLoggedIn ? (
+          <FiLogOut
+            style={{ cursor: 'pointer', fontSize: '20px', color: 'white' }}
+            title="Logout"
+            onClick={() => setShowLogoutModal(true)}
+          />
+        ) : (
+          <Link to="/login" className="p__opensans">Log In / Registration</Link>
+        )}
         <div />
-        <a href="/" className="p__opensans">Book Table</a>
+        <Link to="/" className="p__opensans">Book Table</Link>
       </div>
+
       <div className="app__navbar-smallscreen">
         <GiHamburgerMenu color="#fff" fontSize={27} onClick={() => setToggleMenu(true)} />
         {toggleMenu && (
           <div className="app__navbar-smallscreen_overlay flex__center slide-bottom">
-            <MdOutlineRestaurantMenu fontSize={27} className="overlay__close" onClick={() => setToggleMenu(false)} />
+            <MdOutlineRestaurantMenu
+              fontSize={27}
+              className="overlay__close"
+              onClick={() => setToggleMenu(false)}
+            />
             <ul className="app__navbar-smallscreen_links">
-              <li><a href="#home" onClick={() => setToggleMenu(false)}>Home</a></li>
+              <li><Link to="/" onClick={() => setToggleMenu(false)}>Home</Link></li>
               <li><a href="#about" onClick={() => setToggleMenu(false)}>About</a></li>
               <li><a href="#menu" onClick={() => setToggleMenu(false)}>Menu</a></li>
               <li><a href="#awards" onClick={() => setToggleMenu(false)}>Awards</a></li>
               <li><a href="#contact" onClick={() => setToggleMenu(false)}>Contact</a></li>
+              <li>
+                {isLoggedIn ? (
+                  <FiLogOut
+                    style={{ cursor: 'pointer', fontSize: '20px', color: 'white' }}
+                    title="Logout"
+                    onClick={() => {
+                      setShowLogoutModal(true);
+                      setToggleMenu(false);
+                    }}
+                  />
+                ) : (
+                  <Link to="/login" onClick={() => setToggleMenu(false)}>Log In / Registration</Link>
+                )}
+              </li>
             </ul>
           </div>
         )}
       </div>
+
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="logout-modal-overlay">
+          <div className="logout-modal">
+            <h3>Are you sure you want to logout?</h3>
+            <div className="logout-buttons">
+              <button className="yes-btn" onClick={handleLogout}>Yes</button>
+              <button className="no-btn" onClick={() => setShowLogoutModal(false)}>No</button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

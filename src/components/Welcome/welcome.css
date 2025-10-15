@@ -1,0 +1,32 @@
+/* Full-screen black background */
+.welcome-banner-container {
+    background: var(--color-black);
+  height: 3vh; /* full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Moving text animation */
+.welcome-banner {
+  color: #ffcc00; /* accent color for username */
+  font-size: 1.2rem;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: slideText 10s linear infinite;
+  font-family: 'Poppins', sans-serif;
+}
+
+@keyframes slideText {
+  0% {
+    transform: translateX(100%);
+  }
+  50% {
+    transform: translateX(-10%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
