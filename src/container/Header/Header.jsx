@@ -10,7 +10,12 @@ const Header = () => (
       <SubHeading title="Follow the Flavor Trail" />
       <h1 className="app__header-h1">Where Every Bite Tells a Story</h1>
       <p className="p__opensans" style={{ margin: '2rem 0' }}>Savor the art of fine dining. A perfect harmony of flavor, texture, and aroma in every dish.. </p>
-      <button type="button" className="custom__button">Explore Menu</button>
+      <button type="button" className="custom__button">
+        <ul className="app__navbar-links">
+          <a href="#about">Explore Menu</a>
+        
+        </ul>
+        </button>
     </div>
 
     <div className="app__wrapper_img">

@@ -36,7 +36,12 @@ const SpecialMenu = () => (
     </div>
 
     <div style={{ marginTop: 15 }}>
-      <button type="button" className="custom__button">View More</button>
+      <button type="button" className="custom__button">
+        <ul className="app__navbar-links">
+          <a href="#awards">View More</a>
+        
+        </ul>
+        </button>
     </div>
   </div>
 );

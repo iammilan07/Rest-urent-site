@@ -136,7 +136,9 @@
   font-weight: bold;
   z-index: 1000;
   box-shadow: 0 0 10px #ff4d6d;
+  animation: fadeOut 3s forwards; 
 }
+
 
 
 @keyframes fadeOut {

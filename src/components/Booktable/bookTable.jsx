@@ -46,16 +46,24 @@ const BookTable = () => {
   }, []);
 
   const handleBookClick = (table) => {
-    if (globalBooked.includes(table.id) && bookedTable !== table.id) {
-      // Already booked by someone else
-      setToastMessage('Table is already booked! Please choose another table.');
-      setTimeout(() => setToastMessage(''), 3000);
-      return;
-    }
+  // If the table is booked by someone else
+  if (globalBooked.includes(table.id) && bookedTable !== table.id) {
+    setToastMessage('Table is already booked! Please choose another table.');
+    setTimeout(() => setToastMessage(''), 3000);
+    return;
+  }
 
-    setSelectedTable(table);
-    setShowConfirm(true);
-  };
+  // If user already has a booking and tries to click another table
+  if (bookedTable && bookedTable !== table.id) {
+    setToastMessage(`You have already booked Table ${bookedTable}. Cancel it first to book another!`);
+    setTimeout(() => setToastMessage(''), 4000);
+    return;
+  }
+
+  setSelectedTable(table);
+  setShowConfirm(true);
+};
+
 
   const confirmBooking = async () => {
     try {
