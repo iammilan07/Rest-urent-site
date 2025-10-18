@@ -6,7 +6,7 @@ import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
 import Welcome from './components/Welcome/welcome';
 import './App.css';
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer, Slide } from "react-toastify";
 import BookTable from './components/Booktable/bookTable';
 
 
@@ -43,15 +43,18 @@ const App = () => {
 
       </Routes>
 
-      <ToastContainer 
-  position="top-right" 
-  autoClose={100} 
-  hideProgressBar={true} 
-  newestOnTop={true} 
-  closeOnClick 
-  pauseOnHover={false} 
-  draggable={false}
-/>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={2000}       // <-- 3 seconds
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnHover={false}
+        draggable={false}
+        theme="dark"
+        transition={Slide}
+        limit={1}
+      />
 
     </Router>
   );
