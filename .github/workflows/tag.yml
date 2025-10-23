@@ -1,5 +1,4 @@
 name: Tag Version
-
 on:
   workflow_call:
     secrets:
@@ -9,7 +8,6 @@ on:
         required: true
       AWS_DEFAULT_REGION:
         required: true
-  
     outputs:
       version_tag:
         description: "Generated version tag"
@@ -20,50 +18,26 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version_tag: ${{ steps.generate-tag.outputs.version_tag }}
-    
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # -------------------------------
-      # DEBUG: check if secrets exist
-      - name: Debug AWS Secrets
+      # --------------------------------
+      # Write all variables to file
+      - name: Write environment variables to file
         run: |
-          echo "Checking if AWS secrets exist..."
-          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
-            echo "❌ AWS_ACCESS_KEY_ID is EMPTY!"
-          else
-            echo "✅ AWS_ACCESS_KEY_ID is set (masked)"
-          fi
+          mkdir -p artifacts
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> artifacts/env_vars.txt
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> artifacts/env_vars.txt
+          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> artifacts/env_vars.txt
+          echo "VERSION_TAG=dev-${{ github.run_number }}" >> artifacts/env_vars.txt
+          echo "✅ Saved all variables to artifacts/env_vars.txt"
 
-          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
-            echo "❌ AWS_SECRET_ACCESS_KEY is EMPTY!"
-          else
-            echo "✅ AWS_SECRET_ACCESS_KEY is set (masked)"
-          fi
-
-          if [ -z "${{ secrets.AWS_DEFAULT_REGION }}" ]; then
-            echo "❌ AWS_DEFAULT_REGION is EMPTY!"
-          else
-            echo "✅ AWS_DEFAULT_REGION is set: ${{ secrets.AWS_DEFAULT_REGION }}"
-          fi
-      # -------------------------------
-
-      - name: Configure AWS CLI
-        uses: aws-actions/configure-aws-credentials@v4
+      # --------------------------------
+      # Upload as artifact
+      - name: Upload environment file
+        uses: actions/upload-artifact@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Verify AWS Authentication
-        run: |
-          echo "🔐 Verifying AWS credentials..."
-          aws sts get-caller-identity
-          echo "✅ AWS authentication successful"
-
-      
-      - name: Summary
-        run: |
-          echo "## Version Tagging Complete 🎉" >> $GITHUB_STEP_SUMMARY
-          echo "**Generated Tag:** \`${{ steps.generate-tag.outputs.version_tag }}\`" >> $GITHUB_STEP_SUMMARY
+          name: aws-env-vars
+          path: artifacts/env_vars.txt
+          retention-days: 1  # auto-deletes after 1 day
