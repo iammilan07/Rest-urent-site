@@ -12,8 +12,6 @@ on:
         required: true
       VERSION_TAG:
         required: true
-      MALIK:                     
-        required: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
