@@ -2,16 +2,16 @@ name: Test 2 - Use Variable
 
 on:
   workflow_call:
-    inputs:
-      shared_variable:
-        description: "The variable passed from the main workflow"
-        required: true
-        type: string
+    secrets:
+      SHARED_SECRET:
+        description: "The variable passed as a secret from main workflow"
 
 jobs:
   use_input:
     runs-on: ubuntu-latest
     steps:
-      - name: Display Shared Variable
+      - name: Display Shared Secret
+        env:
+          SHARED_SECRET: ${{ secrets.SHARED_SECRET }}
         run: |
-          echo "The shared variable received in Test 2 is: ${{ inputs.shared_variable }}"
+          echo "The shared secret received in Test 2 is: $SHARED_SECRET"

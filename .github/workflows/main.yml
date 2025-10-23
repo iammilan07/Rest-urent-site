@@ -7,13 +7,13 @@ on:
   workflow_dispatch:
 
 jobs:
-  # 1. Call test1.yml to compute and get the variable
+  # 1. Call test1.yml to compute the variable
   get_variable_job:
     uses: ./.github/workflows/test1.yml
 
-  # 2. Call test2.yml and pass the variable received in step 1
+  # 2. Call test2.yml and pass the variable as a secret
   pass_variable_job:
     needs: get_variable_job
     uses: ./.github/workflows/test2.yml
-    with:
-      shared_variable: ${{ needs.get_variable_job.outputs.my_variable_output }}
+    secrets:
+      SHARED_SECRET: ${{ needs.get_variable_job.outputs.my_variable_output }}

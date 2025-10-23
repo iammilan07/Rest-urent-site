@@ -16,9 +16,6 @@ jobs:
       - name: Compute and Set Variable
         id: set_var
         run: |
-          # This is the variable you want to pass
           MY_VAR="hello-from-test1-$(date +%Y%m%d)"
           echo "Computed variable: $MY_VAR"
-          
-          # Set the variable as a step output
           echo "result=$MY_VAR" >> $GITHUB_OUTPUT
