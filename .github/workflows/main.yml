@@ -16,4 +16,4 @@ jobs:
     needs: get_variable_job
     uses: ./.github/workflows/test2.yml
     with:
-      shared_variable: ${{ needs.get_variable_job.outputs.my_var }}
+      shared_variable: ${{ needs.get_variable_job.outputs.my_variable_output }}
