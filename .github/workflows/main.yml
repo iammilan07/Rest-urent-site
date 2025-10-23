@@ -1,19 +1,33 @@
-name: Main Orchestration Workflow
+# =============================================================================
+# FILE: .github/workflows/main.yml
+# Main CI/CD Pipeline Entrypoint
+# =============================================================================
+name: RigoHR Workhorse CI/CD
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
-jobs:
-  # 1. Call test1.yml to compute the variable
-  get_variable_job:
-    uses: ./.github/workflows/test1.yml
+env:
+  TZ: Asia/Kathmandu
+  VAULT_ADDR: https://openbao.app.rigohr.com
+  AWS_REGION: ap-south-1
 
-  # 2. Call test2.yml and pass the variable as a secret
-  pass_variable_job:
-    needs: get_variable_job
-    uses: ./.github/workflows/test2.yml
+jobs:
+  # Job 1: Fetch secrets from Vault and make them available
+  fetch_secrets:
+    uses: ./.github/workflows/fetch-vault-secret.yml
+    permissions:
+      id-token: write
+      contents: read
+
+  # Job 2: Tag the release
+  tag:
+    needs: fetch_secrets
+    uses: ./.github/workflows/tag.yml
     secrets:
-      SHARED_SECRET: ${{ needs.get_variable_job.outputs.my_variable_output }}
+      AWS_ACCESS_KEY_ID: ${{ needs.fetch_secrets.outputs.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ needs.fetch_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ needs.fetch_secrets.outputs.AWS_DEFAULT_REGION }}
+      

@@ -1,21 +1,51 @@
-name: Test 1 - Compute Variable
+name: Fetch Vault Secrets
 
 on:
   workflow_call:
     outputs:
-      my_variable_output:
-        description: "The variable computed in Test 1"
-        value: ${{ jobs.set_output.outputs.computed_value }}
+      AWS_ACCESS_KEY_ID:
+        description: "AWS Access Key ID from Vault"
+        value: ${{ jobs.get-secrets.outputs.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY:
+        description: "AWS Secret Access Key from Vault"
+        value: ${{ jobs.get-secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION:
+        description: "AWS Default Region from Vault"
+        value: ${{ jobs.get-secrets.outputs.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID:
+        description: "AWS Account ID from Vault"
+        value: ${{ jobs.get-secrets.outputs.AWS_ACCOUNT_ID }}
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
-  set_output:
+  get-secrets:
     runs-on: ubuntu-latest
     outputs:
-      computed_value: ${{ steps.set_var.outputs.result }}
+      AWS_ACCESS_KEY_ID: ${{ steps.vault-secrets.outputs.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ steps.vault-secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ steps.vault-secrets.outputs.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ steps.vault-secrets.outputs.AWS_ACCOUNT_ID }}
+    
+
     steps:
-      - name: Compute and Set Variable
-        id: set_var
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Fetch Secrets from Vault
+        id: vault-secrets
         run: |
-          MY_VAR="hello-from-test1-$(date +%Y%m%d)"
-          echo "Computed variable: $MY_VAR"
-          echo "result=$MY_VAR" >> $GITHUB_OUTPUT
+          # Fetch secrets from Vault
+          AWS_ACCESS_KEY_ID="dummy-access-key"
+          AWS_SECRET_ACCESS_KEY="dummy-secret-key"
+          AWS_DEFAULT_REGION="ap-south-1"
+          AWS_ACCOUNT_ID="123456789012"
+
+          # Important: set as step outputs
+          echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID" >> $GITHUB_OUTPUT
+          echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY" >> $GITHUB_OUTPUT
+          echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> $GITHUB_OUTPUT
+          echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> $GITHUB_OUTPUT
+

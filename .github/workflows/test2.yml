@@ -1,17 +1,69 @@
-name: Test 2 - Use Variable
+name: Tag Version
 
 on:
   workflow_call:
     secrets:
-      SHARED_SECRET:
-        description: "The variable passed as a secret from main workflow"
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_DEFAULT_REGION:
+        required: true
+  
+    outputs:
+      version_tag:
+        description: "Generated version tag"
+        value: ${{ jobs.tag.outputs.version_tag }}
 
 jobs:
-  use_input:
+  tag:
     runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.generate-tag.outputs.version_tag }}
+    
     steps:
-      - name: Display Shared Secret
-        env:
-          SHARED_SECRET: ${{ secrets.SHARED_SECRET }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # -------------------------------
+      # DEBUG: check if secrets exist
+      - name: Debug AWS Secrets
         run: |
-          echo "The shared secret received in Test 2 is: $SHARED_SECRET"
+          echo "Checking if AWS secrets exist..."
+          if [ -z "${{ secrets.AWS_ACCESS_KEY_ID }}" ]; then
+            echo "❌ AWS_ACCESS_KEY_ID is EMPTY!"
+          else
+            echo "✅ AWS_ACCESS_KEY_ID is set (masked)"
+          fi
+
+          if [ -z "${{ secrets.AWS_SECRET_ACCESS_KEY }}" ]; then
+            echo "❌ AWS_SECRET_ACCESS_KEY is EMPTY!"
+          else
+            echo "✅ AWS_SECRET_ACCESS_KEY is set (masked)"
+          fi
+
+          if [ -z "${{ secrets.AWS_DEFAULT_REGION }}" ]; then
+            echo "❌ AWS_DEFAULT_REGION is EMPTY!"
+          else
+            echo "✅ AWS_DEFAULT_REGION is set: ${{ secrets.AWS_DEFAULT_REGION }}"
+          fi
+      # -------------------------------
+
+      - name: Configure AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Verify AWS Authentication
+        run: |
+          echo "🔐 Verifying AWS credentials..."
+          aws sts get-caller-identity
+          echo "✅ AWS authentication successful"
+
+      
+      - name: Summary
+        run: |
+          echo "## Version Tagging Complete 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated Tag:** \`${{ steps.generate-tag.outputs.version_tag }}\`" >> $GITHUB_STEP_SUMMARY
