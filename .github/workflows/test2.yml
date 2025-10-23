@@ -1,10 +1,12 @@
-name: Test 2s
+name: Test 2
+
 on:
   workflow_call:
     inputs:
       my_var:
         required: true
         type: string
+
 jobs:
   print_var:
     runs-on: ubuntu-latest
