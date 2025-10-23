@@ -1,18 +1,15 @@
-# .github/workflows/test2.yml
-name: Test 2
-
+name: Test 2s
 on:
   workflow_call:
     inputs:
       my_var:
         required: true
         type: string
-
 jobs:
   print_var:
     runs-on: ubuntu-latest
     steps:
       - name: Print variable
-        run: echo "Got variable from test1: $MY_VAR"
         env:
           MY_VAR: ${{ inputs.my_var }}
+        run: echo "Got variable from test1: $MY_VAR"
