@@ -37,12 +37,17 @@ jobs:
           echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> artifacts/env_vars.txt
           echo "VERSION_TAG=dev-${{ github.run_number }}" >> artifacts/env_vars.txt
           echo "✅ Saved all variables to artifacts/env_vars.txt"
-
+          ls 
+          mkdir -p artifacts/publish
+          ls
+          cp artifacts/env_vars.txt artifacts/publish/
+          ls artifacts/publish
+          
       # --------------------------------
       # Upload as artifact
       - name: Upload environment file
         uses: actions/upload-artifact@v4
         with:
           name: aws-env-vars
-          path: artifacts/env_vars.txt
+          path: artifacts/publish
           retention-days: 1
