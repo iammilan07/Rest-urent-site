@@ -1,19 +1,24 @@
-# .github/workflows/test1.yml
-name: Test 1
-
+name: Test 1 - Compute Variable
 on:
   workflow_call:
+    # Define an output that this workflow will provide to the caller
     outputs:
-      my_var:
-        description: "Variable from test1"
-        value: ${{ jobs.create_var.outputs.my_var }}
+      my_variable_output:
+        description: "The variable computed in Test 1"
+        value: ${{ jobs.set_output.outputs.computed_value }}
 
 jobs:
-  create_var:
+  set_output:
     runs-on: ubuntu-latest
+    # Define job outputs
     outputs:
-      my_var: ${{ steps.setvar.outputs.my_var }}
+      computed_value: ${{ steps.set_var.outputs.result }}
     steps:
-      - name: Set variable
-        id: setvar
-        run: echo "my_var=Hello from Test1" >> $GITHUB_OUTPUT
+      - name: Compute and Set Variable
+        id: set_var
+        run: |
+          # This is the variable you want to pass (e.g., a build ID, a version number)
+          MY_VAR="hello-from-test1-$(date +%s)"
+          echo "Computed variable: $MY_VAR"
+          # Set the variable as a step output
+          echo "result=$MY_VAR" >> $GITHUB_OUTPUT

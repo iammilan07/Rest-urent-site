@@ -1,15 +1,27 @@
-# .github/workflows/main.yml
-name: Main Workflow
-
+name: Main Orchestration Workflow
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  call-test1:
+  # 1. Call test1.yml to compute and get the variable
+  get_variable_job:
     uses: ./.github/workflows/test1.yml
+    # Map the output from the called workflow (test1.yml) to an output of this job
+    id: get_var
+    with:
+      # No inputs needed for test1.yml in this example
+      
+    # Map the output from test1.yml's 'workflow_call' section to a job output
+    outputs:
+      computed_var: ${{ jobs.get_variable_job.outputs.my_variable_output }}
 
-  call-test2:
-    needs: call-test1
+  # 2. Call test2.yml and pass the variable received in step 1
+  pass_variable_job:
+    needs: get_variable_job # Ensure Test 1 runs first
     uses: ./.github/workflows/test2.yml
     with:
-      my_var: ${{ needs.call-test1.outputs.my_var }}
+      # Pass the output from the previous job into the input of test2.yml
+      shared_variable: ${{ needs.get_variable_job.outputs.computed_var }}

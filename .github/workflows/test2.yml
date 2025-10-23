@@ -1,17 +1,17 @@
-name: Test 2
-
+name: Test 2 - Use Variable
 on:
   workflow_call:
+    # Define an input that this workflow expects from the caller
     inputs:
-      my_var:
+      shared_variable:
+        description: "The variable passed from the main workflow"
         required: true
         type: string
 
 jobs:
-  print_var:
+  use_input:
     runs-on: ubuntu-latest
     steps:
-      - name: Print variable
-        env:
-          MY_VAR: ${{ inputs.my_var }}
-        run: echo "Got variable from test1: $MY_VAR"
+      - name: Display Shared Variable
+        run: |
+          echo "The shared variable received is: ${{ inputs.shared_variable }}"
