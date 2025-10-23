@@ -1,54 +1,19 @@
-name: Deploy Workhorse Docker Image
+name: Echo GitHub Secret
+
 on:
-  workflow_call:
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      AWS_DEFAULT_REGION:
-        required: true
-      AWS_ACCOUNT_ID:
-        required: true
-      VERSION_TAG:
-        required: true
+  workflow_dispatch:  # allows manual trigger
+
 jobs:
-  deploy:
+  show-secret:
     runs-on: ubuntu-latest
-    env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      VERSION_TAG: ${{ secrets.VERSION_TAG }}
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          install: true
-          buildkitd-flags: --debug
-
-
-      - name: Build & Push Docker Image (Multi-Arch)
+      - name: Echo secret (masked)
         run: |
-          ls
-          cd src
-          echo "This is inside src"
-          ls 
-          cat Dockerfile
-          IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG"
-          echo "🚀 Building and pushing Docker image: $IMAGE_URI"
-          docker buildx build \
-            --platform linux/arm64,linux/amd64 \
-            -f Dockerfile \
-            -t "$IMAGE_URI" .
-          docker images
-
-      - name: Summary
+          echo "The MALIK secret is: ${{ secrets.MALIK }}"
+      
+      - name: Check secret length (for verification)
         run: |
-          echo "## Deployment Complete 🎉" >> $GITHUB_STEP_SUMMARY
-          echo "**Docker Image:** \`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ secrets.MALIK }}" | wc -c
