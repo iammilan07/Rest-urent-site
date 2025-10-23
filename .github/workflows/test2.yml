@@ -1,7 +1,7 @@
 name: Test 2 - Use Variable
+
 on:
   workflow_call:
-    # Define an input that this workflow expects from the caller
     inputs:
       shared_variable:
         description: "The variable passed from the main workflow"
@@ -14,4 +14,4 @@ jobs:
     steps:
       - name: Display Shared Variable
         run: |
-          echo "The shared variable received is: ${{ inputs.shared_variable }}"
+          echo "The shared variable received in Test 2 is: ${{ inputs.shared_variable }}"

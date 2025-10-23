@@ -9,27 +9,21 @@ on:
 jobs:
   # 1. Call test1.yml to compute and get the variable
   get_variable_job:
-    # A job that only uses a reusable workflow does NOT need 'runs-on' 
-    # unless it has other steps or commands. We can omit it here.
+    # Use the reusable workflow
+    uses: ./.github/workflows/test1.yml 
     
-    # ❌ REMOVE: The 'outputs' block is not necessary here because the outputs 
-    # of the called workflow are automatically promoted to the job's context 
-    # and directly accessible via 'needs.get_variable_job.outputs.my_variable_output'
-    # in the next job.
-    
-    uses: ./.github/workflows/test1.yml # Line 19
-    
-    with:
-      # No inputs needed for test1.yml in this example
-
+    # Note: No 'runs-on' is needed here because the job only contains 'uses'.
+    # The output from test1.yml (my_variable_output) is now implicitly available
+    # in the 'needs' context of subsequent jobs.
+      
   # 2. Call test2.yml and pass the variable received in step 1
   pass_variable_job:
     needs: get_variable_job # Ensure Test 1 runs first
-    runs-on: ubuntu-latest # This job needs a runner because it uses the 'uses' keyword.
+    runs-on: ubuntu-latest # This job needs a runner because it executes a reusable workflow
     
+    # Use the reusable workflow
     uses: ./.github/workflows/test2.yml
     
     with:
-      # ✅ CORRECT: The variable is directly accessed from the *needs* context.
-      # We reference the output name defined in test1.yml ('my_variable_output').
+      # Pass the output from 'get_variable_job' (which is the output from test1.yml)
       shared_variable: ${{ needs.get_variable_job.outputs.my_variable_output }}
