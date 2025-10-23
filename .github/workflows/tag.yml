@@ -1,4 +1,4 @@
-name: Tag Version
+name: Deploy Workhorse Docker Image
 on:
   workflow_call:
     secrets:
@@ -8,46 +8,47 @@ on:
         required: true
       AWS_DEFAULT_REGION:
         required: true
-    outputs:
-      version_tag:
-        description: "Generated version tag"
-        value: ${{ jobs.tag.outputs.version_tag }}
-
+      AWS_ACCOUNT_ID:
+        required: true
+      VERSION_TAG:
+        required: true
 jobs:
-  tag:
-    # 🐳 Run job inside this container image
-    container:
-      image: mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim
-
+  deploy:
     runs-on: ubuntu-latest
-    outputs:
-      version_tag: ${{ steps.generate-tag.outputs.version_tag }}
-
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      VERSION_TAG: ${{ secrets.VERSION_TAG }}
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # --------------------------------
-      # Write all variables to file
-      - name: Write environment variables to file
-        run: |
-          mkdir -p artifacts
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> artifacts/env_vars.txt
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> artifacts/env_vars.txt
-          echo "AWS_DEFAULT_REGION=${{ secrets.AWS_DEFAULT_REGION }}" >> artifacts/env_vars.txt
-          echo "VERSION_TAG=dev-${{ github.run_number }}" >> artifacts/env_vars.txt
-          echo "✅ Saved all variables to artifacts/env_vars.txt"
-          ls 
-          mkdir -p artifacts/publish
-          ls
-          cp artifacts/env_vars.txt artifacts/publish/
-          ls artifacts/publish
-          
-      # --------------------------------
-      # Upload as artifact
-      - name: Upload environment file
-        uses: actions/upload-artifact@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
         with:
-          name: aws-env-vars
-          path: artifacts/publish
-          retention-days: 1
+          install: true
+          buildkitd-flags: --debug
+
+
+      - name: Build & Push Docker Image (Multi-Arch)
+        run: |
+          ls
+          cd src
+          echo "This is inside src"
+          ls 
+          cat Dockerfile
+          IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG"
+          echo "🚀 Building and pushing Docker image: $IMAGE_URI"
+          docker buildx build \
+            --platform linux/arm64,linux/amd64 \
+            -f Dockerfile \
+            -t "$IMAGE_URI" .
+          docker images
+
+      - name: Summary
+        run: |
+          echo "## Deployment Complete 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Image:** \`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG\`" >> $GITHUB_STEP_SUMMARY
