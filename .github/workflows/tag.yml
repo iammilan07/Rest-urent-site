@@ -15,9 +15,14 @@ on:
 
 jobs:
   tag:
+    # 🐳 Run job inside this container image
+    container:
+      image: mcr.microsoft.com/dotnet/sdk:9.0-bookworm-slim
+
     runs-on: ubuntu-latest
     outputs:
       version_tag: ${{ steps.generate-tag.outputs.version_tag }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,4 +45,4 @@ jobs:
         with:
           name: aws-env-vars
           path: artifacts/env_vars.txt
-          retention-days: 1  # auto-deletes after 1 day
+          retention-days: 1
