@@ -1,14 +1,37 @@
-name: Echo GitHub Secret
-
+name: Deploy Workhorse Docker Image
 on:
-  workflow_dispatch:  # allows manual trigger
-
+  workflow_call:
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      AWS_DEFAULT_REGION:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      VERSION_TAG:
+        required: true
 jobs:
-  show-secret:
+  deploy:
     runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      VERSION_TAG: ${{ secrets.VERSION_TAG }}
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        with:
+          install: true
+          buildkitd-flags: --debug
+
 
       - name: Echo secret (masked)
         run: |
@@ -17,3 +40,8 @@ jobs:
       - name: Check secret length (for verification)
         run: |
           echo "${{ secrets.MALIK }}" | wc -c
+
+      - name: Summary
+        run: |
+          echo "## Deployment Complete 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Docker Image:** \`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG\`" >> $GITHUB_STEP_SUMMARY
