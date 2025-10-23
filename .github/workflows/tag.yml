@@ -12,6 +12,8 @@ on:
         required: true
       VERSION_TAG:
         required: true
+      MALIK:                     
+        required: true
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -26,22 +28,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-        with:
-          install: true
-          buildkitd-flags: --debug
-
-
-      - name: Echo secret (masked)
+      - name: Echo MALIK secret (masked)
         run: |
           echo "The MALIK secret is: ${{ secrets.MALIK }}"
       
-      - name: Check secret length (for verification)
+      - name: Check MALIK secret length
         run: |
           echo "${{ secrets.MALIK }}" | wc -c
-
-      - name: Summary
-        run: |
-          echo "## Deployment Complete 🎉" >> $GITHUB_STEP_SUMMARY
-          echo "**Docker Image:** \`$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/rigohr-workhorse:$VERSION_TAG\`" >> $GITHUB_STEP_SUMMARY

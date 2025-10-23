@@ -16,7 +16,7 @@ env:
 
 jobs:
   # Job 1: Fetch secrets from Vault and make them available
-  fetch_secrets:
+  fetch_vault_secrets:
     uses: ./.github/workflows/fetch-vault-secret.yml
     permissions:
       id-token: write
@@ -24,11 +24,12 @@ jobs:
 
   # Job 2: Tag the release
   tag:
-    needs: fetch_secrets
+    needs: fetch_vault_secrets
     uses: ./.github/workflows/tag.yml
     secrets:
-      AWS_ACCESS_KEY_ID: ${{ needs.fetch_secrets.outputs.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ needs.fetch_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
-      AWS_DEFAULT_REGION: ${{ needs.fetch_secrets.outputs.AWS_DEFAULT_REGION }}
-      AWS_ACCOUNT_ID: ${{ needs.fetch_secrets.outputs.AWS_ACCOUNT_ID }}
-      VERSION_TAG: ${{ needs.fetch_secrets.outputs.version_tag }}
+      AWS_ACCESS_KEY_ID: ${{ needs.fetch_vault_secrets.outputs.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ needs.fetch_vault_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ needs.fetch_vault_secrets.outputs.AWS_DEFAULT_REGION }}
+      AWS_ACCOUNT_ID: ${{ needs.fetch_vault_secrets.outputs.AWS_ACCOUNT_ID }}
+      VERSION_TAG: ${{ needs.fetch_vault_secrets.outputs.version_tag }}
+      MALIK: ${{ secrets.MALIK }}
