@@ -30,4 +30,5 @@ jobs:
       AWS_ACCESS_KEY_ID: ${{ needs.fetch_secrets.outputs.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ needs.fetch_secrets.outputs.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ${{ needs.fetch_secrets.outputs.AWS_DEFAULT_REGION }}
-      
+      AWS_ACCOUNT_ID: ${{ needs.fetch_secrets.outputs.AWS_ACCOUNT_ID }}
+      VERSION_TAG: ${{ needs.fetch_secrets.outputs.version_tag }}
