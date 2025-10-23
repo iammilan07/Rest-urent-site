@@ -9,21 +9,11 @@ on:
 jobs:
   # 1. Call test1.yml to compute and get the variable
   get_variable_job:
-    # Use the reusable workflow
-    uses: ./.github/workflows/test1.yml 
-    
-    # Note: No 'runs-on' is needed here because the job only contains 'uses'.
-    # The output from test1.yml (my_variable_output) is now implicitly available
-    # in the 'needs' context of subsequent jobs.
-      
+    uses: ./.github/workflows/test1.yml
+
   # 2. Call test2.yml and pass the variable received in step 1
   pass_variable_job:
-    needs: get_variable_job # Ensure Test 1 runs first
-    runs-on: ubuntu-latest # This job needs a runner because it executes a reusable workflow
-    
-    # Use the reusable workflow
+    needs: get_variable_job
     uses: ./.github/workflows/test2.yml
-    
     with:
-      # Pass the output from 'get_variable_job' (which is the output from test1.yml)
-      shared_variable: ${{ needs.get_variable_job.outputs.my_variable_output }}
+      shared_variable: ${{ needs.get_variable_job.outputs.my_var }}
