@@ -1,5 +1,5 @@
 # =============================================================================
-# FILE: .github/workflows/main.yml
+# FILE: .github/workflows/main.yml (Modified)
 # Main CI/CD Pipeline Entrypoint
 # =============================================================================
 name: RigoHR Workhorse CI/CD
@@ -15,16 +15,45 @@ env:
   AWS_REGION: ap-south-1
 
 jobs:
+  # New Job: Check for file changes in specific paths
+  check_paths:
+    runs-on: ubuntu-latest
+    outputs:
+      src_changes: ${{ steps.filter.outputs.src }}
+      server_changes: ${{ steps.filter.outputs.server }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**' # Detects changes in the src/ directory
+            server:
+              - 'server/**' # Detects changes in the server/ directory
+
+  ---
+
   # Job 1: Fetch secrets from Vault and make them available
+  # Runs ONLY if there are changes in 'server/**'
   fetch_vault_secrets:
+    needs: check_paths
+    if: needs.check_paths.outputs.server_changes == 'true'
     uses: ./.github/workflows/fetch-vault-secret.yml
     permissions:
       id-token: write
       contents: read
-
+    
+  ---
+    
   # Job 2: Tag the release
+  # Runs ONLY if 'fetch_vault_secrets' ran (needed) AND there are changes in 'src/**'
   tag:
-    needs: fetch_vault_secrets
+    needs: [fetch_vault_secrets, check_paths] # Need check_paths for the condition
+    if: needs.check_paths.outputs.src_changes == 'true'
+    # Note: Because 'tag' needs 'fetch_vault_secrets', it will only run if both conditions are met:
+    # 1. Changes in 'src/**' (from its own if: condition)
+    # 2. 'fetch_vault_secrets' job ran successfully (due to needs: dependency)
     uses: ./.github/workflows/tag.yml
     secrets:
       AWS_ACCESS_KEY_ID: ${{ needs.fetch_vault_secrets.outputs.AWS_ACCESS_KEY_ID }}
