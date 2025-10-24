@@ -32,8 +32,6 @@ jobs:
             server:
               - 'server/**' # Detects changes in the server/ directory
 
-  ---
-
   # Job 1: Fetch secrets from Vault and make them available
   # Runs ONLY if there are changes in 'server/**'
   fetch_vault_secrets:
@@ -43,9 +41,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    
-  ---
-    
+      
   # Job 2: Tag the release
   # Runs ONLY if 'fetch_vault_secrets' ran (needed) AND there are changes in 'src/**'
   tag:
