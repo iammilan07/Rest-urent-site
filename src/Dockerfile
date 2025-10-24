@@ -1,4 +1,4 @@
-# asp net docker image
+# asp net docker images
 FROM mcr.microsoft.com/dotnet/aspnet:9.0-alpine
 
 RUN apk update && \
