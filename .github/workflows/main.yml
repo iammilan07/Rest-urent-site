@@ -45,7 +45,7 @@ jobs:
   # Job 2: Tag the release
   # Runs ONLY if 'fetch_vault_secrets' ran (needed) AND there are changes in 'src/**'
   tag:
-    needs: [fetch_vault_secrets, check_paths] # Need check_paths for the condition
+    needs: [check_paths] # Need check_paths for the condition
     if: needs.check_paths.outputs.src_changes == 'true'
     # Note: Because 'tag' needs 'fetch_vault_secrets', it will only run if both conditions are met:
     # 1. Changes in 'src/**' (from its own if: condition)
